@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <title>Book Finder</title>
+</head>
+<body>
+    <div class="container">
+        <div id="book-search">
+            <div class="d-flex justify-content-center">
+                <div class="p-4">BOOK FINDER</div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="input-group mb-5 mx-5">
+                    <input id="book-name" type="text" class="form-control" placeholder="Search by book title or author..." aria-label="Search by book title or author..."
+                        aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button id="book-srch" class="btn btn-success" type="button">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="init-msg">
+            <div class="d-flex justify-content-center">
+                <div class="pt-1 mr-2 align-self-center"><i class="material-icons">mood_bad</i></div>
+                <div class="align-self-center">Nothing Here Yet - Try Searching For A Book!</div>
+            </div>
+        </div>
+        <div id="book-results" class="d-flex justify-content-center row"></div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            $("#book-name").on('change paste', function() {
+                var bookName = $("#book-name").val();
+                if(bookName){
+                    $( "#init-msg" ).addClass("d-none");
+                    $( "#book-results" ).empty();
+                    bookSearch(bookName);
+                } else {
+                    $( "#init-msg" ).removeClass("d-none");
+                    $( "#book-results" ).empty();
+                }          
+            });
+            function bookSearch(bookName) {
+                console.log("Finding book: "+bookName)
+                $.get('https://www.googleapis.com/books/v1/volumes?q='+bookName, handleResponse);
+            }
+            function handleResponse(response) {
+                if(response && response.items){
+                    for (var i = 0; i < response.items.length; i++) {
+                        var item = response.items[i];
+                        // in production code, item.text should have the HTML entities escaped.
+                        document.getElementById("book-results").innerHTML += ""
+                            +"<div class='col-sm-6 my-4'>"
+                                +"<div class='card mb-3 h-100' style='max-width: 540px;'>"
+                                    +" <div class='row no-gutters'>"
+                                            +"<div class='col-md-4'>"
+                                                +"<img src='"+item.volumeInfo.imageLinks.smallThumbnail+"' class='card-img' alt='"+item.volumeInfo.title+"' Image>"
+                                            +"</div>"
+                                            +"<div class='col-md-8'>"
+                                                +"<div class='card-body'>"
+                                                    +"<h5 class='card-title'>"+item.volumeInfo.title+"</h5>"
+                                                    +"<p class='card-text'>By: "+item.volumeInfo.authors.join()+"<br/>Published By: "+item.volumeInfo.publisher+"<br/>Published Date: "+item.volumeInfo.publishedDate+"</p>"
+                                                    +"<a class='btn btn-success btn-lg mt-4' href='"+item.volumeInfo.previewLink+"' target='_blank'>See this Book</a>"
+                                            +"</div>"
+                                        +"</div>"
+                                    +"</div>"
+                                +"</div>"
+                            +"</div>";
+                    }
+                } else {
+                    console.log("No data, response : " + JSON.stringify(response));
+                    document.getElementById("book-results").innerHTML = "<h4>No Results</h4>";                  
+                }                
+            }
+        });        
+    </script>
+</body>
+</html>
